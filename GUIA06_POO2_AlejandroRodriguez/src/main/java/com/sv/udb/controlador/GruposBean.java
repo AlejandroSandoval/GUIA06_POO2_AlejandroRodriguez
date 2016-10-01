@@ -5,8 +5,10 @@
  */
 package com.sv.udb.controlador;
 
+import static com.fasterxml.jackson.databind.util.ClassUtil.getRootCause;
 import com.sv.udb.ejb.GruposFacadeLocal;
 import com.sv.udb.modelo.Grupos;
+import com.sv.udb.utils.LOG4J;
 import java.io.Serializable;
 import java.util.List;
 import javax.annotation.PostConstruct;
@@ -30,6 +32,7 @@ public class GruposBean implements Serializable{
     private List<Grupos> listGrup;
     private Grupos objeGrup;
     private boolean guardar;
+    private LOG4J log;
     
     /**
      * Creates a new instance of GruposBean
@@ -42,6 +45,7 @@ public class GruposBean implements Serializable{
     {
         this.listGrup = FCDEGrupos.findAll();
         this.limpForm();
+        log = new LOG4J();
     }
 
     public GruposFacadeLocal getFCDEGrupos() {
@@ -89,11 +93,13 @@ public class GruposBean implements Serializable{
         {
             FCDEGrupos.create(this.objeGrup);
             this.listGrup.add(this.objeGrup);
+            log.info("Grupo creado: "+this.objeGrup.getNombGrup());
             this.limpForm();
             ctx.execute("setMessage('MESS_SUCC', 'Atención', 'Datos guardados')");
         }
         catch(Exception ex)
         {
+            log.error("Error al crear grupo: "+getRootCause(ex).getMessage());
             ctx.execute("setMessage('MESS_ERRO', 'Atención', 'Error al guardar ')");
         }
         finally
@@ -110,10 +116,12 @@ public class GruposBean implements Serializable{
             this.listGrup.remove(this.objeGrup); //Limpia el objeto viejo
             FCDEGrupos.edit(this.objeGrup);
             this.listGrup.add(this.objeGrup); //Agrega el objeto modificado
+            log.info("Grupo modificado: "+this.objeGrup.getCodiCurs());
             ctx.execute("setMessage('MESS_SUCC', 'Atención', 'Datos Modificados')");
         }
         catch(Exception ex)
         {
+            log.error("Error al modificar grupo: "+getRootCause(ex).getMessage());
             ctx.execute("setMessage('MESS_ERRO', 'Atención', 'Error al modificar ')");
         }
         finally
@@ -129,11 +137,13 @@ public class GruposBean implements Serializable{
         {
             FCDEGrupos.remove(this.objeGrup);
             this.listGrup.remove(this.objeGrup);
+            log.info("Grupo elimando: "+this.objeGrup.getNombGrup());
             this.limpForm();
             ctx.execute("setMessage('MESS_SUCC', 'Atención', 'Datos Eliminados')");
         }
         catch(Exception ex)
         {
+            log.error("Error al eliminar grupo: "+getRootCause(ex).getMessage());
             ctx.execute("setMessage('MESS_ERRO', 'Atención', 'Error al eliminar')");
         }
         finally
@@ -150,6 +160,7 @@ public class GruposBean implements Serializable{
         }
         catch(Exception ex)
         {
+            log.error("Error al cargar grupos: "+getRootCause(ex).getMessage());
             ex.printStackTrace();
         }
         finally
@@ -171,6 +182,7 @@ public class GruposBean implements Serializable{
         }
         catch(Exception ex)
         {
+            log.error("Error al cargar un grupo: "+getRootCause(ex).getMessage());
             ctx.execute("setMessage('MESS_ERRO', 'Atención', 'Error al consultar')");
         }
         finally
